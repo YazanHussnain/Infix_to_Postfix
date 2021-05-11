@@ -1,0 +1,171 @@
+/* START */
+// Function that check for opening brackets in string
+int IsOpenBracket(char str){
+    if(str == '{' || str == '(' || str == '['){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+/* END */
+
+/* START */
+// Function that check for closing brackets in string
+int IsCloseBracket(char str){
+    if(str == '}' || str == ')' || str == ']'){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+/* END */
+
+/* START */
+// Function that check the pair of brackets for given strings.
+int IsPairBrackets(char str1, char str2){
+    if(str1 == '(' && str2 == ')')
+        return 1;
+    else if(str1 == '{' && str2 == '}')
+        return 1;
+    else if(str1 == '[' && str2 == ']')
+        return 1;
+    else
+        return 0;
+}
+/* END */
+
+/* STRAT */
+int BracketBalanced(char *str){
+    Stack S;
+    // Create Stack
+    S = CreateStack(10);
+    int i = 0;
+    // Iterate until string ends
+    while(str[i]){
+        // if the given character is an opening bracket the push it in the stack
+        if(IsOpenBracket(str[i])){
+            Push(str[i], S);
+        }
+        // if the given character is a closing bracket.
+        // then check that stack if empty or not if stack is empty than expression is unbalanced
+        if(IsCloseBracket(str[i])){
+            if(IsEmpty(S)){
+                return 0;
+            }
+            // If stack is not empty then check if the current character
+            // is matching pair of First character of stack
+            // if it is then Pop it from the stack else return 0;
+            // return 0 implies that expression is unbalanced brackets
+            else if (IsPairBrackets(Top(S), str[i])){
+                Pop(S);
+            }
+            else if (!IsPairBrackets(Top(S), str[i])){
+                return 0;
+            }
+        }
+        i++;
+    }
+    // If the stack is empty this implies The expression has balanced brackets else not balanced
+    if(IsEmpty(S)){
+        DisposeStack(S);
+        return 1;
+    }
+    else {
+        DisposeStack(S);
+        return 0;
+    }
+}
+/* END */
+
+/* START */
+int OperatorPrecedence(char str){
+    switch(str){
+    case '+':
+    case '-':
+        return 1;
+
+    case '*':
+    case '/':
+        return 2;
+
+    case '^':
+        return 3;
+    }
+    return -1;
+}
+/* END */
+
+/* START */
+int IsOperator(char str){
+    if(str == '^' || str == '-' || str == '+' || str == '/' || str == '*'){
+        return 1;
+    }
+    return 0;
+}
+/* END */
+
+/* START */
+int IsOperand(char str){
+    if(isdigit(str) || str == '.' || (str >= 'a' && str <= 'z') || (str >= 'A' && str <= 'Z')){
+        return 1;
+    }
+    return 0;
+}
+/* END */
+
+/* START */
+void infixToPostfix(char *infix, char *postfix, int str_size){
+    Stack S;
+    S = CreateStack(str_size);
+    char Top_Stack;
+    int i;
+    if(BracketBalanced(infix)){
+        for(i = 0; i < str_size; i++){
+            if(isspace(infix[i])){
+                continue;
+            }
+            else if(IsOperand(infix[i])){
+                while (IsOperand(infix[i])){
+                    strncat(postfix, &infix[i], 1);
+                    i++;
+                }
+                i--;
+                strcat(postfix, " ");
+            }
+            else if(IsOpenBracket(infix[i])){
+                Push(infix[i], S);
+            }
+            else if(IsCloseBracket(infix[i])){
+                while(!IsEmpty(S) && !IsOpenBracket(Top(S))){
+                    Top_Stack = Top(S);
+                    strncat(postfix, &Top_Stack, 1);
+                    strcat(postfix, " ");
+                    Pop(S);
+                }
+                Pop(S);
+            }
+            else if(IsOperator(infix[i])){
+                while(!IsEmpty(S) && (OperatorPrecedence(Top(S)) >= OperatorPrecedence(infix[i]))){
+                    Top_Stack = Top(S);
+                    strncat(postfix, &Top_Stack, 1);
+                    strcat(postfix, " ");
+                    Pop(S);
+                }
+                Push(infix[i], S);
+            }
+        }
+        while(!IsEmpty(S)){
+            Top_Stack = Top(S);
+            strncat(postfix, &Top_Stack, 1);
+            strcat(postfix, " ");
+            Pop(S);
+        }
+    }
+    else{
+        printf("Brackets unbalanced. No conversion performed");
+    }
+    DisposeStack(S);
+}
+/* END */
